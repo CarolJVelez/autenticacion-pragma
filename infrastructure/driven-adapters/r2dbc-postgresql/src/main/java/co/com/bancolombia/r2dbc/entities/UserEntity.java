@@ -20,9 +20,7 @@ public class UserEntity {
 
     @Id
     @Column("user_id")
-    private String userId;
-    //@Column("document_id")
-    //private String documentId;
+    private Long userId;
     private String name;
     private String lastname;
     @Column("birth_date")

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class User {
-    private String userId;
+    private Long userId;
     private String documentId;
     private String name;
     private String lastname;

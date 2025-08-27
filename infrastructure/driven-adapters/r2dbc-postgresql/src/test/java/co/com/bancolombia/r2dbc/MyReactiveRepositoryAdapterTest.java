@@ -33,10 +33,10 @@ class MyReactiveRepositoryAdapterTest {
     void mustFindValueById() {
 
         UserEntity userEntity = new UserEntity();
-        when(repository.findById("1")).thenReturn(Mono.just(userEntity));
+        when(repository.findById(1L)).thenReturn(Mono.just(userEntity));
         when(mapper.map("test", Object.class)).thenReturn("test");
 
-        Mono<User> result = repositoryAdapter.findById("1");
+        Mono<User> result = repositoryAdapter.findById(1L);
 
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals("test"))

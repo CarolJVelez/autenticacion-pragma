@@ -7,6 +7,7 @@ import co.com.bancolombia.model.user.gateways.LoggerRepository;
 import co.com.bancolombia.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -23,5 +24,17 @@ public class Handler {
                 .map(mapper::toModel)
                 .flatMap(userUseCase::create)
                 .doOnError(e -> logger.error("Error en createUser: {}", e.getMessage()));
+    }
+
+    public Flux<User> listAllUsers()
+    {
+        logger.info("GET /api/v1/usuarios");
+        return userUseCase.findAll();
+    }
+
+    public Mono<User> findUserById(Long id)
+    {
+        logger.info("GET /api/v1/usuarios/{id}");
+        return userUseCase.findById(id);
     }
 }

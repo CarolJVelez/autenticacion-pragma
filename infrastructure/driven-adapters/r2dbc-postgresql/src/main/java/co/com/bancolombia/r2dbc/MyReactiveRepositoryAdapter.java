@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         User/* change for domain model */,
         UserEntity/* change for adapter model */,
-        String,
+        Long,
         MyReactiveRepository
 > implements UserRepository {
     public MyReactiveRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper) {
@@ -25,7 +25,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<Void> deleteById(String id) {
+    public Mono<Void> deleteById(Long id) {
         return repository.deleteByUserId(id);
     }
 

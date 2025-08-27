@@ -26,7 +26,7 @@ public class UserUseCase {
         }).doOnSuccess(u -> logger.info("Usuario creado userId={}, email={}", u.getUserId(), u.getEmail()));
     }
 
-    public Mono<User> update(String id, User user) {
+    public Mono<User> update(Long id, User user) {
         return userRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Usuario no encontrado: " + id)))
                 .flatMap(ex -> userRepository.update(
@@ -43,15 +43,15 @@ public class UserUseCase {
                 ));
     }
 
-    public Mono<User> getById(String id) {
+    public Mono<User> findById(Long id) {
         return userRepository.findById(id).switchIfEmpty(Mono.error(new NotFoundException("Usuario no encontrado: " + id)));
     }
 
-    public Flux<User> getAll() {
+    public Flux<User> findAll() {
         return userRepository.findAll();
     }
 
-    public Mono<Void> delete(String id) {
+    public Mono<Void> delete(Long id) {
         return userRepository.findById(id).switchIfEmpty(Mono.error(new NotFoundException("Usuario no encontrado: " + id))).then(userRepository.deleteById(id));
     }
 }

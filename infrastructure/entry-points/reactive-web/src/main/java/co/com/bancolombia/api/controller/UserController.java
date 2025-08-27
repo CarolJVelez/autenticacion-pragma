@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -37,5 +38,20 @@ public class UserController {
                         .created(URI.create("/api/v1/usuarios/" + saved.getUserId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(mapper.toDto(saved)));
+    }
+
+    @Operation(summary = "Listar Usuarios", tags = {"ListUsuarios"})
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<UserResponseDTO> listAllUser(){
+        return handler.listAllUsers()
+                .map(mapper::toDto);
+    }
+
+    @Operation(summary = "Obtener usuario por id", tags = {"Usuarios"})
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<UserResponseDTO>> findUserById(@PathVariable("id")  Long id) {
+        return handler.findUserById(id)
+                .map(user -> ResponseEntity.ok(mapper.toDto(user)))
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 }

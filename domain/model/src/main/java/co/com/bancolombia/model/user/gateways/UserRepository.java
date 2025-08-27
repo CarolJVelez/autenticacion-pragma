@@ -11,10 +11,10 @@ public interface UserRepository {
 
     Mono<Boolean> existsByEmail(String e);
 
-    Mono<User> findById(String id);
+    Mono<User> findById(Long id);
 
     Flux<User> findAll();
 
-    Mono<Void> deleteById(String id);
+    Mono<Void> deleteById(Long id);
 
 }

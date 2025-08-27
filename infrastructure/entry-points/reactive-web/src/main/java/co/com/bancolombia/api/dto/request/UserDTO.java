@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UserDTO {
 
-    private String userId;
+    private Long userId;
 
     @NotBlank(message = "Los nombres son obligatorios")
     private String nombres;
