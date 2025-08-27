@@ -2,35 +2,26 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.request.CreateUserDTO;
 import co.com.bancolombia.api.mapper.UserDTOMapper;
-import co.com.bancolombia.usecase.user.interfaces.IUserUseCase;
+import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.user.gateways.LoggerRepository;
+import co.com.bancolombia.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.net.URI;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
 @RequiredArgsConstructor
 public class Handler {
 
-    private final IUserUseCase userUseCase;
-    private final RequestValidator validator;
+    private final UserUseCase userUseCase;
     private final UserDTOMapper mapper;
+    private final LoggerRepository logger;
 
-
-    public Mono<ServerResponse> createUser(ServerRequest req) {
-        return req.bodyToMono(CreateUserDTO.class)
-                .flatMap(validator::validate)
+    public Mono<User> createUser(CreateUserDTO dto) {
+        logger.info("POST /api/v1/usuarios recibido");
+        return Mono.just(dto)
                 .map(mapper::toModel)
                 .flatMap(userUseCase::create)
-                .flatMap(saved -> ServerResponse
-                        .created(URI.create("/api/users/" + saved.getUserId()))
-                        .contentType(APPLICATION_JSON)
-                        .bodyValue(mapper.toDto(saved))
-                );
+                .doOnError(e -> logger.error("Error en createUser: {}", e.getMessage()));
     }
 }

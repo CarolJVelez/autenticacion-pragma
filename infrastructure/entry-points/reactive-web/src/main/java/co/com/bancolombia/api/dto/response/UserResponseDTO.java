@@ -1,14 +1,24 @@
 package co.com.bancolombia.api.dto.response;
 
-import java.math.BigInteger;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record UserResponseDTO(
-        String userId,
-        String nombres,
-        String apellidos,
-        java.time.LocalDate fechaNacimiento,
-        String direccion,
-        String telefono,
-        String correoElectronico,
-        BigInteger salarioBase
-) {}
+import java.math.BigInteger;
+import java.time.LocalDate;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserResponseDTO {
+    private String userId;
+    private String nombres;
+    private String apellidos;
+    private LocalDate fechaNacimiento;
+    private String direccion;
+    private String telefono;
+    private String correoElectronico;
+    private BigInteger salarioBase;
+}
