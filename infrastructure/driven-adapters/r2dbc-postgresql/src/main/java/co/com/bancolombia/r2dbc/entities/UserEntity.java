@@ -22,7 +22,8 @@ public class UserEntity {
     @Column("user_id")
     private Long userId;
     private String name;
-    private String lastname;
+    private String lastName;
+    private String document;
     @Column("birth_date")
     private LocalDate birthDate;
     private String address;

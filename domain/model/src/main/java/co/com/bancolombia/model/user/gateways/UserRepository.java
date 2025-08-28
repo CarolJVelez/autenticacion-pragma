@@ -13,6 +13,8 @@ public interface UserRepository {
 
     Mono<User> findById(Long id);
 
+    Mono<User> findByEmail(String email);
+
     Flux<User> findAll();
 
     Mono<Void> deleteById(Long id);

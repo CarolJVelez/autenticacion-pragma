@@ -14,11 +14,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UserResponseDTO {
     private Long userId;
-    private String nombres;
-    private String apellidos;
-    private LocalDate fechaNacimiento;
-    private String direccion;
-    private String telefono;
-    private String correoElectronico;
-    private BigInteger salarioBase;
+    private String name;
+    private String lastName;
+    private String document;
+    private LocalDate birthDate;
+    private String address;
+    private String phone;
+    private String email;
+    private BigInteger baseSalary;
 }

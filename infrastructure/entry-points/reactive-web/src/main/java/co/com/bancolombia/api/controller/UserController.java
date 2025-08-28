@@ -54,4 +54,12 @@ public class UserController {
                 .map(user -> ResponseEntity.ok(mapper.toDto(user)))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
+
+    @Operation(summary = "Obtener usuario por email", tags = {"Usuarios"})
+    @GetMapping(value = "/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<UserResponseDTO>> findUserById(@PathVariable("email")  String email) {
+        return handler.findUserByEmail(email)
+                .map(user -> ResponseEntity.ok(mapper.toDto(user)))
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
 }

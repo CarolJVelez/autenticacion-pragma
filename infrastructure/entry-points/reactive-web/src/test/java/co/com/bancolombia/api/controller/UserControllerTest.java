@@ -41,7 +41,7 @@ class UserControllerTest {
     @Test
     void whenValidRequest_then201() {
         var dto = new CreateUserDTO(
-                "Carol", "Velez", LocalDate.parse("1996-04-10"),
+                "Carol", "Velez", "12345", LocalDate.parse("1996-04-10"),
                 "Cra 1 # 23-45", "3172985404",
                 "carol@example.com", BigInteger.valueOf(2_500_000)
         );
@@ -50,7 +50,7 @@ class UserControllerTest {
         var user = User.builder()
                 .userId(123L)
                 .name("Carol")
-                .lastname("Velez")
+                .lastName("Velez")
                 .birthDate(LocalDate.parse("1996-04-10"))
                 .address("Cra 1 # 23-45")
                 .phone("3172985404")
@@ -59,7 +59,7 @@ class UserControllerTest {
                 .build();
 
         var response = new UserResponseDTO(
-                123L, "Carol", "Velez", LocalDate.parse("1996-04-10"),
+                123L, "Carol", "Velez", "12345", LocalDate.parse("1996-04-10"),
                 "Cra 1 # 23-45", "3172985404", "carol@example.com",
                 BigInteger.valueOf(2_500_000)
         );
@@ -83,7 +83,7 @@ class UserControllerTest {
     @Test
     void whenInvalidTelefono_then400() {
         var dto = new CreateUserDTO(
-                "Carol", "Velez", LocalDate.parse("1996-04-10"),
+                "Carol", "Velez", "12345", LocalDate.parse("1996-04-10"),
                 "Cra 1 # 23-45", "",
                 "carol@example.com", BigInteger.valueOf(2_500_000)
         );

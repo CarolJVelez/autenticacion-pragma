@@ -37,4 +37,12 @@ public class Handler {
         logger.info("GET /api/v1/usuarios/{id}");
         return userUseCase.findById(id);
     }
+
+    public Mono<User> findUserByEmail(String email)
+    {
+        logger.info("GET /api/v1/usuarios/{email}");
+        return userUseCase.findByEmail(email);
+    }
+
+
 }

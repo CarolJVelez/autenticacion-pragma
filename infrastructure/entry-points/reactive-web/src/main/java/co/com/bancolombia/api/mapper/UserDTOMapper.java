@@ -9,21 +9,23 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserDTOMapper {
 
-    @Mapping(target = "name", source = "nombres")
-    @Mapping(target = "lastname", source = "apellidos")
-    @Mapping(target = "birthDate", source = "fechaNacimiento")
-    @Mapping(target = "address", source = "direccion")
-    @Mapping(target = "phone", source = "telefono")
-    @Mapping(target = "email", source = "correoElectronico")
-    @Mapping(target = "baseSalary", source = "salarioBase")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "birthDate", source = "birthDate")
+    @Mapping(target = "document", source = "document")
+    @Mapping(target = "address", source = "address")
+    @Mapping(target = "phone", source = "phone")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "baseSalary", source = "baseSalary")
     User toModel(CreateUserDTO dto);
 
-    @Mapping(target = "nombres", source = "name")
-    @Mapping(target = "apellidos", source = "lastname")
-    @Mapping(target = "fechaNacimiento", source = "birthDate")
-    @Mapping(target = "direccion", source = "address")
-    @Mapping(target = "telefono", source = "phone")
-    @Mapping(target = "correoElectronico", source = "email")
-    @Mapping(target = "salarioBase", source = "baseSalary")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "birthDate", source = "birthDate")
+    @Mapping(target = "document", source = "document")
+    @Mapping(target = "address", source = "address")
+    @Mapping(target = "phone", source = "phone")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "baseSalary", source = "baseSalary")
     UserResponseDTO toDto(User user);
 }

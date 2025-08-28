@@ -12,9 +12,9 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class User {
     private Long userId;
-    private String documentId;
     private String name;
-    private String lastname;
+    private String lastName;
+    private String document;
     private LocalDate birthDate;
     private String address;
     private String email;
