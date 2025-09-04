@@ -1,5 +1,6 @@
 package co.com.bancolombia.api.dto.response;
 
+import co.com.bancolombia.model.rol.Rol;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,5 @@ public class UserResponseDTO {
     private String phone;
     private String email;
     private BigInteger baseSalary;
+    private Rol role;
 }

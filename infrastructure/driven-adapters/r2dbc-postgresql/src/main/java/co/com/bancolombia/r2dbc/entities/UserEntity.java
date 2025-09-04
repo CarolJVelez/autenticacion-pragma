@@ -31,5 +31,8 @@ public class UserEntity {
     private String email;
     @Column("base_salary")
     private BigInteger baseSalary;
+    private String password;
+    @Column("role_id")
+    private Long roleId;
 
 }

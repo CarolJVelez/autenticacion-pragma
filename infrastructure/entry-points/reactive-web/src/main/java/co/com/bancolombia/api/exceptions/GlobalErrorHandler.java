@@ -1,6 +1,7 @@
 package co.com.bancolombia.api.exceptions;
 
 import co.com.bancolombia.model.exceptions.DuplicateEmailException;
+import co.com.bancolombia.model.exceptions.InvalidCredentialsException;
 import co.com.bancolombia.model.exceptions.NotFoundException;
 import co.com.bancolombia.model.user.gateways.LoggerRepository;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,17 @@ public class GlobalErrorHandler {
                 .body(Map.of(
                         "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         "message", "Error interno del servidor"
+                ));
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCreds(InvalidCredentialsException ex) {
+        logger.warn("Credenciales inválidas: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                        "status", HttpStatus.UNAUTHORIZED.value(),
+                        "message", ex.getMessage()
                 ));
     }
 }

@@ -1,6 +1,13 @@
 package co.com.bancolombia.usecase.userValidation;
 
+import co.com.bancolombia.model.exceptions.DuplicateEmailException;
+import co.com.bancolombia.model.exceptions.NotFoundException;
+import co.com.bancolombia.model.rol.Rol;
+import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.user.gateways.LoggerRepository;
+import co.com.bancolombia.model.user.gateways.UserRepository;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.util.regex.Pattern;
@@ -12,9 +19,16 @@ public final class UserValidation {
 
     private static final BigDecimal SALARIO_MAX = new BigDecimal("15000000");
 
-    private UserValidation() { }
+    private final UserRepository userRepository;
 
-    public static void validate(User user) {
+    private final LoggerRepository logger;
+
+    public UserValidation(UserRepository userRepository, LoggerRepository logger) {
+        this.userRepository = userRepository;
+        this.logger = logger;
+    }
+
+    public Mono<Void> validate(User user) {
 
         if (isBlank(user.getEmail()) || !EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
             throw new IllegalArgumentException("Correo electrónico inválido");
@@ -26,6 +40,7 @@ public final class UserValidation {
                 || salario.compareTo(SALARIO_MAX) > 0) {
             throw new IllegalArgumentException("El salario base debe estar entre 0 y 15,000,000");
         }
+        return Mono.empty();
     }
 
     private static boolean isBlank(String s) {
@@ -38,4 +53,16 @@ public final class UserValidation {
         if (value instanceof Number) return BigDecimal.valueOf(((Number) value).doubleValue());
         try { return new BigDecimal(value.toString()); } catch (Exception e) { return null; }
     }
+
+    public Mono<Void> validateUserExists(String email) {
+        return userRepository.existsByEmail(email)
+                .flatMap(exist -> {
+                    if (exist) {
+                        logger.info("Correo duplicado detectado: {}", email);
+                        return Mono.error(new DuplicateEmailException(email));
+                    }
+                    return Mono.empty();
+                });
+    }
+
 }

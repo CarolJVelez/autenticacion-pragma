@@ -27,6 +27,13 @@ public class UserDTO {
     @NotBlank(message = "El documento de identidad es obligatorio")
     private String document;
 
+    @NotBlank(message = "La Contraseña es obligatoria")
+    @Size(min = 6, max = 100)
+    private String password;
+
+    @NotBlank(message = "El rol es obligatorio")
+    private String role; // ADMIN, ASESOR, CLIENTE
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Past(message = "La fecha nacimiento debe ser una fecha pasada")
     private LocalDate birthDate;

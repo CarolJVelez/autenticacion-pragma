@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,6 +31,7 @@ public class UserController {
     private final UserDTOMapper mapper;
 
     @Operation(summary = "Crear usuario", tags = {"Usuarios"})
+    @PreAuthorize("hasAnyRole('ADMIN','ASESOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<UserResponseDTO>> create(@Valid @RequestBody CreateUserDTO body) {

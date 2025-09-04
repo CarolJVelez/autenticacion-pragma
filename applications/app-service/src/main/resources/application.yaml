@@ -39,3 +39,9 @@ adapters:
     database: autenticacion
     username: postgres
     password: postgres
+    schema: public
+
+jwt:
+  secret: "a-string-secret-at-least-256-bits-long"
+  expiration: 14400
+  issuer: "autenticacion-ms"

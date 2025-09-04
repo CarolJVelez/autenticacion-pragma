@@ -6,26 +6,14 @@ import co.com.bancolombia.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { RoleDTOMapper.class })
 public interface UserDTOMapper {
 
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "lastName", source = "lastName")
-    @Mapping(target = "birthDate", source = "birthDate")
-    @Mapping(target = "document", source = "document")
-    @Mapping(target = "address", source = "address")
-    @Mapping(target = "phone", source = "phone")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "baseSalary", source = "baseSalary")
+    // CreateUserDTO.role (String) -> User.role (Rol) lo resuelve RoleDTOMapper.map(String)
+    @Mapping(target = "userId", ignore = true) // <-- clave
+    @Mapping(target = "role", source = "role") // usa RoleDTOMapper.map(String)
     User toModel(CreateUserDTO dto);
 
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "lastName", source = "lastName")
-    @Mapping(target = "birthDate", source = "birthDate")
-    @Mapping(target = "document", source = "document")
-    @Mapping(target = "address", source = "address")
-    @Mapping(target = "phone", source = "phone")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "baseSalary", source = "baseSalary")
+    // Y para respuesta: User.role:Rol -> UserResponseDTO.role:String usando RoleDTOMapper.map(Rol)
     UserResponseDTO toDto(User user);
 }

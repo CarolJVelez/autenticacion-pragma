@@ -1,5 +1,6 @@
 package co.com.bancolombia.model.user;
 
+import co.com.bancolombia.model.rol.Rol;
 import lombok.*;
 
 import java.math.BigInteger;
@@ -14,10 +15,12 @@ public class User {
     private Long userId;
     private String name;
     private String lastName;
+    private String password;
     private String document;
     private LocalDate birthDate;
     private String address;
     private String email;
     private String phone;
     private BigInteger baseSalary;
+    private Rol role;
 }
