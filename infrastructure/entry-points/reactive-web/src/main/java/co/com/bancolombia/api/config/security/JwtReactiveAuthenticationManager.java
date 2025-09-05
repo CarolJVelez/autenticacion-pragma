@@ -49,7 +49,7 @@ public class JwtReactiveAuthenticationManager implements ReactiveAuthenticationM
                     aat.setDetails(Map.of("role", role, "sub", sub));
                 }
 
-                return auth; // <- Authentication
+                return auth;
             } catch (Exception e) {
                 throw new BadCredentialsException("Token inválido");
             }

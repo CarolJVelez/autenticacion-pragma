@@ -57,6 +57,7 @@ public class UserController {
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
+    @PreAuthorize("hasAnyRole('CLIENTE')")
     @Operation(summary = "Obtener usuario por email", tags = {"Usuarios"})
     @GetMapping(value = "/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<UserResponseDTO>> findUserById(@PathVariable("email")  String email) {

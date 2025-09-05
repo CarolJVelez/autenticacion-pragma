@@ -1,23 +1,16 @@
 package co.com.bancolombia.api.config.security;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+@Data
 @Component
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
-    /**
-     * Secret key as plain text. In production prefer environment variables and at least 256-bit key.
-     */
+
     private String secret;
-    /** seconds */
     private long expiration;
     private String issuer;
 
-    public String getSecret() { return secret; }
-    public void setSecret(String secret) { this.secret = secret; }
-    public long getExpiration() { return expiration; }
-    public void setExpiration(long expiration) { this.expiration = expiration; }
-    public String getIssuer() { return issuer; }
-    public void setIssuer(String issuer) { this.issuer = issuer; }
 }
