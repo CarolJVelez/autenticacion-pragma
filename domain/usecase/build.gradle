@@ -1,3 +1,6 @@
 dependencies {
     implementation project(':model')
+
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.reactivestreams:reactive-streams:1.0.4'
 }

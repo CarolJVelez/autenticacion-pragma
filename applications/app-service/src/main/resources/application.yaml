@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   application:
     name: "authentication"
@@ -20,5 +20,28 @@ management:
     health:
       probes:
         enabled: true
+logging:
+  level:
+    root: INFO
+    co.com.bancolombia: DEBUG
+
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: http://localhost:4200,http://localhost:8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+adapters:
+  r2dbc:
+    host: localhost
+    port: 5432          # <— faltaba
+    database: autenticacion
+    username: postgres
+    password: postgres
+    schema: public
+
+jwt:
+  secret: "a-string-secret-at-least-256-bits-long"
+  expiration: 14400
+  issuer: "autenticacion-ms"
