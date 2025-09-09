@@ -34,16 +34,6 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<Void> deleteById(Long id) {
-        return repository.deleteByUserId(id);
-    }
-
-    @Override
-    public Mono<User> update(User u) {
-        return null;
-    }
-
-    @Override
     public Mono<Boolean> existsByEmail(String email) {
         return repository.existsByEmail(email);
     }
@@ -69,6 +59,11 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                             })
                             .defaultIfEmpty(user);
                 });
+    }
+
+    @Override
+    public Mono<Boolean> findByDocument(String document) {
+        return repository.existsByDocument(document);
     }
 
     @Override

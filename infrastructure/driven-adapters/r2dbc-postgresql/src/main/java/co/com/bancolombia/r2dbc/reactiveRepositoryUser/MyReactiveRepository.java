@@ -15,6 +15,8 @@ public interface MyReactiveRepository extends ReactiveCrudRepository<UserEntity,
 
     Mono<Boolean> existsByEmail(String email);
 
+    Mono<Boolean> existsByDocument(String email);
+
     @Query("SELECT * FROM usuarios WHERE email = :email")
     Mono<UserEntity> findByEmail(String email);
 

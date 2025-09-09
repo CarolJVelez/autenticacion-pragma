@@ -1,5 +1,6 @@
 package co.com.bancolombia.api.exceptions;
 
+import co.com.bancolombia.model.exceptions.DuplicateDocumentException;
 import co.com.bancolombia.model.exceptions.DuplicateEmailException;
 import co.com.bancolombia.model.exceptions.InvalidCredentialsException;
 import co.com.bancolombia.model.exceptions.NotFoundException;
@@ -10,7 +11,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+
 import java.util.Map;
+import java.util.regex.Pattern;
 
 
 @RestControllerAdvice
@@ -75,5 +78,12 @@ public class GlobalErrorHandler {
                         "status", HttpStatus.UNAUTHORIZED.value(),
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler({DuplicateDocumentException.class})
+    public ResponseEntity<Map<String, Object>> handleDuplicates(RuntimeException ex) {
+        logger.warn("Conflicto: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("status", HttpStatus.CONFLICT.value(), "message", ex.getMessage()));
     }
 }

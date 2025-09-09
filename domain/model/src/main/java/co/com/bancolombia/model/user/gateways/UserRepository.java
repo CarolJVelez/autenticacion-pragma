@@ -9,17 +9,15 @@ import java.util.Collection;
 public interface UserRepository {
     Mono<User> save(User u);
 
-    Mono<User> update(User u);
-
     Mono<Boolean> existsByEmail(String e);
 
     Mono<User> findById(Long id);
 
     Mono<User> findByEmail(String email);
 
-    Flux<User> findAll();
+    Mono<Boolean> findByDocument(String document);
 
-    Mono<Void> deleteById(Long id);
+    Flux<User> findAll();
 
     Flux<User> findAllById(Collection<Long> ids);
 

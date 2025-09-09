@@ -62,4 +62,15 @@ public final class UserValidation {
                 });
     }
 
+    public Mono<Void> validateUserExistsForDocument(String document) {
+        return userRepository.findByDocument(document)
+                .flatMap(exist -> {
+                    if (exist) {
+                        logger.info("Numero de documento duplicado detectado: {}", document);
+                        return Mono.error(new DuplicateEmailException(document));
+                    }
+                    return Mono.empty();
+                });
+    }
+
 }

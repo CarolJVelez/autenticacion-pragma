@@ -29,8 +29,10 @@ public class UserUseCase {
 
     public Mono<User> create(User user) {
         logger.info("Inicio creacion de usuario con el email= {}", user.getEmail());
+
         return userValidation.validate(user)
                 .then(userValidation.validateUserExists(user.getEmail()))
+                .then(userValidation.validateUserExistsForDocument(user.getDocument()))
                 .then(rolRepository.findByName(user.getRole().getName()))
                 .flatMap(rol -> passwordEncoder.encode(user.getPassword())
                         .map(hash -> user.toBuilder()
