@@ -11,6 +11,5 @@ public interface MyReactiveRepositoryRol extends ReactiveCrudRepository<RolEntit
 
     Mono<RolEntity> findById(Long id);
 
-    //@Query("SELECT * FROM roles WHERE nombre = UPPER(:nombre)")
     Mono<RolEntity> findByName(String name);
 }

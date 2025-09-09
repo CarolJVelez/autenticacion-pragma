@@ -1,5 +1,6 @@
 package co.com.bancolombia.usecase.auth;
 
+import co.com.bancolombia.model.auth.Login;
 import co.com.bancolombia.model.exceptions.InvalidCredentialsException;
 import co.com.bancolombia.model.security.gateways.PasswordEncoderGateway;
 import co.com.bancolombia.model.security.gateways.TokenProvider;
@@ -24,7 +25,6 @@ public class AuthUseCase {
             .flatMap(user -> passwordEncoder.matches(password, user.getPassword())
                 .flatMap(match -> {
                     if (!match) return Mono.error(new InvalidCredentialsException("Credenciales inválidas"+ user.getPassword() + user.getName() + user.getName()));
-                    System.out.println("carolv usuario role.." + user.getRole());
                     return tokenProvider.generateToken(user)
                             .zipWith(tokenProvider.getExpirationSeconds(),
                                 (tok, exp) -> new AuthResult(tok, "Bearer", exp));

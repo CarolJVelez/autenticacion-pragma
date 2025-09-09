@@ -8,7 +8,11 @@ import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.bancolombia.r2dbc.reactiveRepositoryRol.MyReactiveRepositoryRol;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Collection;
+import java.util.stream.StreamSupport;
 
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
@@ -81,4 +85,30 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                     return out;
                 });
     }
+
+    @Override
+    public Flux<User> findAllById(Collection<Long> ids) {
+        // Convertimos a Collection por si llega como Iterable
+        Collection<Long> asCollection = (ids instanceof Collection)
+                ? (Collection<Long>) ids
+                : StreamSupport.stream(ids.spliterator(), false).toList();
+
+        return repository.findByUserIdIn(asCollection)
+                .flatMap(ue -> {
+                    User user = this.toEntity(ue);
+                    Long roleId = ue.getRoleId();
+                    if (roleId == null) return Mono.just(user);
+                    return rolRepository.findById(roleId)
+                            .map(re -> {
+                                user.setRole(Rol.builder()
+                                        .roleId(re.getId())
+                                        .name(re.getName())
+                                        .description(re.getDescription())
+                                        .build());
+                                return user;
+                            })
+                            .defaultIfEmpty(user);
+                });
+    }
+
 }

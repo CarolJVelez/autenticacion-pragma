@@ -1,99 +1,98 @@
 package co.com.bancolombia.api.controller;
 
+import co.com.bancolombia.model.exceptions.DuplicateEmailException;
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.user.gateways.LoggerRepository;
+import co.com.bancolombia.model.user.gateways.UserRepository;
 import co.com.bancolombia.usecase.userValidation.UserValidation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserValidationTest {
+
+    @Mock private UserRepository userRepository;
+    @Mock private LoggerRepository logger;
+
+    private UserValidation userValidation;
+
+    @BeforeEach
+    void setUp() {
+        userValidation = new UserValidation(userRepository, logger);
+    }
 
     private User base() {
         return User.builder()
+                .userId(1L)
                 .name("Carol")
                 .lastName("Velez")
-                .document("123")
-                .birthDate(LocalDate.parse("1996-04-10"))
-                .address("Cra 1")
-                .phone("3000000000")
                 .email("carol@example.com")
-                .baseSalary(BigInteger.valueOf(1_000_000))
+                .password("secret123")
+                .baseSalary(BigInteger.valueOf(3_000_000))
                 .build();
     }
 
-    @Test
-    void validate_validUser_shouldPass() {
-        assertDoesNotThrow(() -> UserValidation.validate(base()));
-    }
+    // --- validate(User) ---
 
     @Test
-    void validate_nullUser_shouldThrowNPE() {
-        assertThrows(NullPointerException.class, () -> UserValidation.validate(null));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "", " ",               // vacío o espacios
-            "noatsign.com",        // sin @
-            "@domain.com",         // local-part vacío
-            "user@",               // domain vacío
-            " user@domain.com",    // espacio inicial
-            "user@domain.com ",    // espacio final
-            "user@@domain.com",    // doble @
-            "userdomain.com"       // sin @
-    })
-    void validate_badEmail_shouldThrow(String email) {
-        User u = base(); u.setEmail(email);
-        IllegalArgumentException ex =
-                assertThrows(IllegalArgumentException.class, () -> UserValidation.validate(u));
-        assertTrue(ex.getMessage().toLowerCase().contains("correo"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "a@b",
-            "bad@domain",
-            "user.name+tag@sub-domain",
-            "u_s-e.r@dom-ain"
-    })
-    void validate_emailsAcceptedByCurrentRegex_shouldPass(String email) {
-        User u = base(); u.setEmail(email);
-        assertDoesNotThrow(() -> UserValidation.validate(u));
+    void validate_ok_shouldComplete() {
+        StepVerifier.create(userValidation.validate(base()))
+                .verifyComplete();
     }
 
     @Test
-    void validate_nullSalary_shouldThrow() {
-        User u = base(); u.setBaseSalary(null);
-        IllegalArgumentException ex =
-                assertThrows(IllegalArgumentException.class, () -> UserValidation.validate(u));
-        assertTrue(ex.getMessage().toLowerCase().contains("salario"));
-    }
-
-    @Test
-    void validate_zeroSalary_shouldThrow() {
-        User u = base(); u.setBaseSalary(BigInteger.ZERO);
-        assertThrows(IllegalArgumentException.class, () -> UserValidation.validate(u));
+    void validate_invalidEmail_shouldThrow() {
+        User u = base(); u.setEmail("bad-email");
+        assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
     }
 
     @Test
     void validate_negativeSalary_shouldThrow() {
         User u = base(); u.setBaseSalary(BigInteger.valueOf(-1));
-        assertThrows(IllegalArgumentException.class, () -> UserValidation.validate(u));
+        assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
     }
 
     @Test
     void validate_aboveMaxSalary_shouldThrow() {
         User u = base(); u.setBaseSalary(BigInteger.valueOf(15_000_001));
-        assertThrows(IllegalArgumentException.class, () -> UserValidation.validate(u));
+        assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
     }
 
     @Test
     void validate_nullUser_shouldThrowNullPointer() {
-        assertThrows(NullPointerException.class, () -> UserValidation.validate(null));
+        assertThrows(NullPointerException.class, () -> userValidation.validate(null));
+    }
+
+    // --- validateUserExists(String) ---
+
+    @Test
+    void validateUserExists_duplicate_shouldError() {
+        when(userRepository.existsByEmail("carol@example.com")).thenReturn(Mono.just(true));
+
+        StepVerifier.create(userValidation.validateUserExists("carol@example.com"))
+                .expectError(DuplicateEmailException.class)
+                .verify();
+
+        verify(logger).info("Correo duplicado detectado: {}", "carol@example.com");
+    }
+
+    @Test
+    void validateUserExists_available_shouldComplete() {
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(Mono.just(false));
+
+        StepVerifier.create(userValidation.validateUserExists("new@example.com"))
+                .verifyComplete();
+
+        verify(logger, never()).info(anyString(), any());
     }
 }

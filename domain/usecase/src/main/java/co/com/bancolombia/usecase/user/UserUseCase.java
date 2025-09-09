@@ -13,7 +13,10 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class UserUseCase {
@@ -58,5 +61,42 @@ public class UserUseCase {
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new NotFoundException("Usuario no encontrado por correo: " + email)));
     }
+
+    public Flux<User> findByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            logger.warn("findByIds llamado con lista vacía o nula");
+            return Flux.empty();
+        }
+
+        List<Long> distinctOrdered = ids.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        return userRepository.findAllById(distinctOrdered)
+                .collectMap(User::getUserId) // Map<Long, User>
+                .flatMapMany(foundMap -> {
+                    // Log de faltantes
+                    var foundIds = foundMap.keySet();
+                    var missing = distinctOrdered.stream()
+                            .filter(id -> !foundIds.contains(id))
+                            .toList();
+                    if (!missing.isEmpty()) {
+                        logger.warn("Usuarios no encontrados para IDs: {}", missing);
+                    } else {
+                        logger.info("findByIds: todos los usuarios encontrados. Total={}", foundIds.size());
+                    }
+
+                    var orderedFound = ids.stream()
+                            .map(foundMap::get)
+                            .filter(Objects::nonNull)
+                            .toList();
+
+                    return orderedFound.isEmpty()
+                            ? Flux.empty()
+                            : Flux.fromIterable(orderedFound);
+                });
+    }
+
 
 }

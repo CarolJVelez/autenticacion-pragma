@@ -1,9 +1,6 @@
 package co.com.bancolombia.usecase.userValidation;
 
 import co.com.bancolombia.model.exceptions.DuplicateEmailException;
-import co.com.bancolombia.model.exceptions.NotFoundException;
-import co.com.bancolombia.model.rol.Rol;
-import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.gateways.LoggerRepository;
 import co.com.bancolombia.model.user.gateways.UserRepository;

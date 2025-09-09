@@ -10,7 +10,7 @@ public interface RoleDTOMapper {
         if (roleName == null) return null;
         return Rol.builder()
                 .name(roleName.trim().toUpperCase())   // ADMIN | ASESOR | CLIENTE
-                .build();                                 // sin id (el UseCase lo resuelve)
+                .build();
     }
 
     // Rol (dominio) -> String (DTO)

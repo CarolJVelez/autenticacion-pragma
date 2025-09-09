@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/usuarios")
@@ -64,5 +65,13 @@ public class UserController {
         return handler.findUserByEmail(email)
                 .map(user -> ResponseEntity.ok(mapper.toDto(user)))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    @Operation(summary = "Obtener usuarios por lista de IDs (bulk)", tags = {"Usuarios"})
+    @PreAuthorize("hasAnyRole('ADMIN','ASESOR')")
+    @PostMapping(value="/bulk", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<UserResponseDTO> findUsersByIds(@RequestBody List<Long> ids) {
+        return handler.findUsersByIds(ids)
+                .map(mapper::toDto);
     }
 }
