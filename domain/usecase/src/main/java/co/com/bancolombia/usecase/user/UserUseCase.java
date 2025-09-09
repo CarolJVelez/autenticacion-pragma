@@ -74,9 +74,8 @@ public class UserUseCase {
                 .toList();
 
         return userRepository.findAllById(distinctOrdered)
-                .collectMap(User::getUserId) // Map<Long, User>
+                .collectMap(User::getUserId)
                 .flatMapMany(foundMap -> {
-                    // Log de faltantes
                     var foundIds = foundMap.keySet();
                     var missing = distinctOrdered.stream()
                             .filter(id -> !foundIds.contains(id))

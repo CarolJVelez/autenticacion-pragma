@@ -20,6 +20,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,6 +42,19 @@ class UserUseCaseTest {
 
     private User baseUser;
     private Rol baseRol;
+
+    private User u1, u2, u3;
+
+
+
+    @BeforeEach
+    void setUp() {
+        baseRol = Rol.builder().roleId(1L).name("ASESOR").description("asesor").build();
+
+        u1 = User.builder().userId(10L).email("a@a.com").password("p1").name("A").lastName("1").role(baseRol).build();
+        u2 = User.builder().userId(20L).email("b@b.com").password("p2").name("B").lastName("2").role(baseRol).build();
+        u3 = User.builder().userId(30L).email("c@c.com").password("p3").name("C").lastName("3").role(baseRol).build();
+    }
 
     @BeforeEach
     void init() {
@@ -146,9 +161,7 @@ class UserUseCaseTest {
 
     @Test
     void create_roleNotFound_shouldError() {
-        // No duplicado
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(false));
-        // Rol no encontrado -> error
         when(rolRepository.findByName(eq("ASESOR"))).thenReturn(Mono.error(new NotFoundException("role not found")));
 
         StepVerifier.create(userUseCase.create(baseUser))
@@ -186,4 +199,27 @@ class UserUseCaseTest {
                 .verify();
     }
 
+
+    @Test
+    void getByIds_preservesOrder_andSkipsMissing() {
+        List<Long> ids = Arrays.asList(30L, 99L, 10L);
+        when(userRepository.findAllById(eq(ids))).thenReturn(Flux.just(u1, u3));
+
+        StepVerifier.create(userUseCase.findByIds(ids))
+                .expectNext(u3)
+                .expectNext(u1)
+                .verifyComplete();
+    }
+
+    @Test
+    void findAll_empty_shouldComplete() {
+        when(userRepository.findAll()).thenReturn(Flux.empty());
+        StepVerifier.create(userUseCase.findAll()).verifyComplete();
+    }
+
+    @Test
+    void findByIds_emptyList_shouldComplete() {
+        StepVerifier.create(userUseCase.findByIds(List.of())).verifyComplete();
+        verify(userRepository, never()).findAllById(any());
+    }
 }

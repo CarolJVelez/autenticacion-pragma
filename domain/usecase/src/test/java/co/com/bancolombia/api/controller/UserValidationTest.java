@@ -42,7 +42,6 @@ class UserValidationTest {
                 .build();
     }
 
-    // --- validate(User) ---
 
     @Test
     void validate_ok_shouldComplete() {
@@ -73,7 +72,6 @@ class UserValidationTest {
         assertThrows(NullPointerException.class, () -> userValidation.validate(null));
     }
 
-    // --- validateUserExists(String) ---
 
     @Test
     void validateUserExists_duplicate_shouldError() {
@@ -94,5 +92,35 @@ class UserValidationTest {
                 .verifyComplete();
 
         verify(logger, never()).info(anyString(), any());
+    }
+
+    @Test
+    void validate_nullSalary_shouldThrow() {
+        User u = base(); u.setBaseSalary(null);
+        assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
+    }
+
+    @Test
+    void validate_zeroSalary_shouldThrow() {
+        User u = base(); u.setBaseSalary(BigInteger.ZERO);
+        assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
+    }
+
+    @Test
+    void validate_minPositiveSalary_shouldComplete() {
+        User u = base(); u.setBaseSalary(BigInteger.ONE);
+        userValidation.validate(u);
+    }
+
+    @Test
+    void validate_maxSalaryBoundary_shouldComplete() {
+        User u = base(); u.setBaseSalary(BigInteger.valueOf(15_000_000));
+        userValidation.validate(u);
+    }
+
+    @Test
+    void validate_blankEmail_shouldThrow() {
+        User u = base(); u.setEmail("  ");
+        assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
     }
 }

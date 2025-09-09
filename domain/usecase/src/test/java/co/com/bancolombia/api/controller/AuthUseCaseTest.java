@@ -21,7 +21,7 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthUseCaseTest {
@@ -43,7 +43,7 @@ class AuthUseCaseTest {
                 .name("Carol")
                 .lastName("Velez")
                 .email("carol@example.com")
-                .password("$2a$10$encoded") // hash almacenado
+                .password("$2a$10$encoded")
                 .baseSalary(BigInteger.valueOf(5_000_000))
                 .build();
     }
@@ -113,5 +113,73 @@ class AuthUseCaseTest {
                         org.junit.jupiter.api.Assertions.assertTrue(ex.getMessage().contains("exp-fail")))
                 .verify();
     }
+
+    @Test
+    void login_userNotFound_shouldErrorWithInvalidCredentials() {
+        when(userRepository.findByEmail(eq("missing@example.com"))).thenReturn(Mono.empty());
+
+        StepVerifier.create(authUseCase.login("missing@example.com", "secret"))
+                .expectErrorSatisfies(ex -> {
+                    assert ex instanceof InvalidCredentialsException;
+                })
+                .verify();
+
+        verify(userRepository).findByEmail("missing@example.com");
+        verifyNoInteractions(passwordEncoder, tokenProvider);
+    }
+
+    @Test
+    void login_passwordMismatch_shouldErrorWithInvalidCredentials() {
+        user = user.toBuilder().password("$2a$10$encoded").build();
+
+        when(userRepository.findByEmail(eq("user@example.com"))).thenReturn(Mono.just(user));
+        when(passwordEncoder.matches(eq("wrong"), eq("$2a$10$encoded"))).thenReturn(Mono.just(false));
+
+        StepVerifier.create(authUseCase.login("user@example.com", "wrong"))
+                .expectError(InvalidCredentialsException.class)
+                .verify();
+
+        verify(passwordEncoder).matches("wrong", "$2a$10$encoded");
+        verifyNoInteractions(tokenProvider);
+    }
+
+
+    @Test
+    void login_ok_shouldReturnAuthResult() {
+        user = user.toBuilder().password("$2a$10$encoded").build();
+
+        when(userRepository.findByEmail(eq("user@example.com"))).thenReturn(Mono.just(user));
+        when(passwordEncoder.matches(eq("secret"), eq("$2a$10$encoded"))).thenReturn(Mono.just(true));
+        when(tokenProvider.generateToken(eq(user))).thenReturn(Mono.just("jwt.token"));
+        when(tokenProvider.getExpirationSeconds()).thenReturn(Mono.just(3600L));
+
+        StepVerifier.create(authUseCase.login("user@example.com", "secret"))
+                .expectNextMatches(res -> {
+                    AuthResult r = (AuthResult) res;
+                    return r.getToken().equals("jwt.token")
+                            && r.getTokenType().equals("Bearer")
+                            && r.getExpiresIn() == 3600L;
+                })
+                .verifyComplete();
+
+        verify(passwordEncoder).matches("secret", "$2a$10$encoded");
+        verify(tokenProvider).generateToken(user);
+        verify(tokenProvider).getExpirationSeconds();
+    }
+
+    @Test
+    void login_passwordEncoderEmitsError_shouldPropagate() {
+        when(userRepository.findByEmail(eq(user.getEmail()))).thenReturn(Mono.just(user));
+        when(passwordEncoder.matches(eq("secret"), eq("$2a$10$encoded")))
+                .thenReturn(Mono.error(new RuntimeException("encoder-down")));
+
+        StepVerifier.create(authUseCase.login(user.getEmail(), "secret"))
+                .expectErrorSatisfies(ex ->
+                        org.junit.jupiter.api.Assertions.assertTrue(ex.getMessage().contains("encoder-down")))
+                .verify();
+
+        verifyNoInteractions(tokenProvider);
+    }
+
 
 }
