@@ -123,4 +123,32 @@ class UserValidationTest {
         User u = base(); u.setEmail("  ");
         assertThrows(IllegalArgumentException.class, () -> userValidation.validate(u));
     }
+
+    @Test
+    void validateUserExistsForDocument_duplicate_shouldError() {
+        // Existe alguien con ese documento -> true
+        when(userRepository.findByDocument(eq("123"))).thenReturn(Mono.just(true));
+
+        StepVerifier.create(userValidation.validateUserExistsForDocument("123"))
+                .expectErrorSatisfies(ex -> {
+                    assert ex != null; // falla como se espera
+                })
+                .verify();
+
+        verify(userRepository).findByDocument("123");
+    }
+
+
+    @Test
+    void validateUserExistsForDocument_available_shouldComplete() {
+        // No existe nadie con ese documento -> false
+        when(userRepository.findByDocument(eq("ABC123"))).thenReturn(Mono.just(false));
+
+        StepVerifier.create(userValidation.validateUserExistsForDocument("ABC123"))
+                .verifyComplete();
+
+        verify(userRepository).findByDocument("ABC123");
+    }
+
+
 }
