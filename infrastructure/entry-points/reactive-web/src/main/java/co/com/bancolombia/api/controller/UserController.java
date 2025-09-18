@@ -7,6 +7,7 @@ import co.com.bancolombia.api.mapper.UserDTOMapper;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -33,6 +34,7 @@ public class UserController {
 
     @Operation(summary = "Crear usuario", tags = {"Usuarios"})
     @PreAuthorize("hasAnyRole('ADMIN','ASESOR')")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<UserResponseDTO>> create(@Valid @RequestBody CreateUserDTO body) {
@@ -58,7 +60,6 @@ public class UserController {
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
-    //@PreAuthorize("hasAnyRole('CLIENTE', 'ASESOR')")
     @Operation(summary = "Obtener usuario por email", tags = {"Usuarios"})
     @GetMapping(value = "/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<UserResponseDTO>> findUserById(@PathVariable("email")  String email) {
@@ -69,6 +70,7 @@ public class UserController {
 
     @Operation(summary = "Obtener usuarios por lista de IDs (bulk)", tags = {"Usuarios"})
     @PreAuthorize("hasAnyRole('ADMIN','ASESOR')")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping(value="/bulk", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<UserResponseDTO> findUsersByIds(@RequestBody List<Long> ids) {
         return handler.findUsersByIds(ids)

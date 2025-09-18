@@ -1,5 +1,8 @@
 package co.com.bancolombia.api.config.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,6 +22,13 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER
+)
 public class SecurityConfig {
 
     @Bean
@@ -38,7 +48,7 @@ public class SecurityConfig {
                 .authorizeExchange(ex -> ex
                         .pathMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         .pathMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/actuator/**", "/h2/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/v1/usuarios/email/**").permitAll() // <-- agrega esto
+                        .pathMatchers(HttpMethod.GET, "/api/v1/usuarios/email/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/usuarios").hasAnyRole("ADMIN", "ASESOR")
                         .anyExchange().authenticated()
                 )
