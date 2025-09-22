@@ -38,6 +38,7 @@ public class UserUseCase {
                         .map(hash -> user.toBuilder()
                                 .password(hash)
                                 .role(rol)
+                                .maxIndebtedness(userValidation.calcularCapacidadEndeudamiento(user.getBaseSalary()))
                                 .build()
                         )
                 )

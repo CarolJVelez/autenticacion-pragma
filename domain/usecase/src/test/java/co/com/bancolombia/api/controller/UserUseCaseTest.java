@@ -81,7 +81,9 @@ class UserUseCaseTest {
     @Test
     void create_duplicateEmail_shouldErrorDuplicateEmail() {
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(true));
+        when(userRepository.findByDocument(any())).thenReturn(Mono.empty());
         when(rolRepository.findByName(anyString())).thenReturn(Mono.never());
+
         StepVerifier.create(userUseCase.create(baseUser))
                 .expectError(DuplicateEmailException.class)
                 .verify();
@@ -90,9 +92,11 @@ class UserUseCaseTest {
         verify(userRepository, never()).save(any());
     }
 
+
     @Test
     void create_ok_shouldSaveAndReturn() {
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(false));
+        when(userRepository.findByDocument(any())).thenReturn(Mono.empty());
         when(rolRepository.findByName(eq("ASESOR"))).thenReturn(Mono.just(baseRol));
         when(passwordEncoder.encode(eq("secret"))).thenReturn(Mono.just("hashed-pass"));
         when(userRepository.save(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
@@ -111,6 +115,7 @@ class UserUseCaseTest {
         verify(userRepository).save(any());
         verify(logger, atLeastOnce()).info(anyString(), any());
     }
+
 
     @Test
     void findAll_shouldReturnFlux() {
@@ -162,7 +167,11 @@ class UserUseCaseTest {
     @Test
     void create_roleNotFound_shouldError() {
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(false));
-        when(rolRepository.findByName(eq("ASESOR"))).thenReturn(Mono.error(new NotFoundException("role not found")));
+        // Evita NPE en validateUserExistsForDocument
+        when(userRepository.findByDocument(any())).thenReturn(Mono.empty());
+        // Forzamos el error del rol
+        when(rolRepository.findByName(eq("ASESOR")))
+                .thenReturn(Mono.error(new NotFoundException("role not found")));
 
         StepVerifier.create(userUseCase.create(baseUser))
                 .expectError(NotFoundException.class)
@@ -175,6 +184,8 @@ class UserUseCaseTest {
     @Test
     void create_encoderFails_shouldError() {
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(false));
+        // Evita NPE en validateUserExistsForDocument
+        when(userRepository.findByDocument(any())).thenReturn(Mono.empty());
         when(rolRepository.findByName(eq("ASESOR"))).thenReturn(Mono.just(baseRol));
         when(passwordEncoder.encode(eq("secret"))).thenReturn(Mono.error(new RuntimeException("enc-fail")));
 
@@ -186,9 +197,11 @@ class UserUseCaseTest {
         verify(userRepository, never()).save(any());
     }
 
+
     @Test
     void create_saveFails_shouldError() {
         when(userRepository.existsByEmail(anyString())).thenReturn(Mono.just(false));
+        when(userRepository.findByDocument(any())).thenReturn(Mono.empty());
         when(rolRepository.findByName(eq("ASESOR"))).thenReturn(Mono.just(baseRol));
         when(passwordEncoder.encode(eq("secret"))).thenReturn(Mono.just("hashed-pass"));
         when(userRepository.save(any())).thenReturn(Mono.error(new RuntimeException("db-down")));
@@ -198,6 +211,7 @@ class UserUseCaseTest {
                         org.junit.jupiter.api.Assertions.assertTrue(ex.getMessage().contains("db-down")))
                 .verify();
     }
+
 
 
     @Test
@@ -222,4 +236,36 @@ class UserUseCaseTest {
         StepVerifier.create(userUseCase.findByIds(List.of())).verifyComplete();
         verify(userRepository, never()).findAllById(any());
     }
+
+    @Test
+    void findByIds_withDuplicatesAndNulls_preservesOrderAndDuplicates() {
+        // ids con duplicado y un null
+        List<Long> ids = Arrays.asList(10L, 10L, null, 20L);
+
+        // u1 y u2 ya están creados en setUp() con ids 10 y 20
+        when(userRepository.findAllById(eq(List.of(10L, 20L)))).thenReturn(Flux.just(u1, u2));
+
+        StepVerifier.create(userUseCase.findByIds(ids))
+                // Debe respetar el orden original y repetir el duplicado
+                .expectNext(u1)
+                .expectNext(u1)
+                .expectNext(u2)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByIds_allMissing_shouldReturnEmptyAndHitEmptyBranch() {
+        List<Long> ids = List.of(999L);
+
+        // Devuelve vacío -> no encontró nada
+        when(userRepository.findAllById(eq(ids))).thenReturn(Flux.empty());
+
+        StepVerifier.create(userUseCase.findByIds(ids))
+                .verifyComplete();
+
+        // No afirmamos el mensaje exacto para no acoplar,
+        // pero sí que hubo una advertencia o al menos un log.
+        verify(logger, atLeastOnce()).warn(anyString(), any());
+    }
+
 }
