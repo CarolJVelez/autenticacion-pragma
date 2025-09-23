@@ -7,12 +7,15 @@ import co.com.bancolombia.model.user.gateways.UserRepository;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.regex.Pattern;
 
 public final class UserValidation {
 
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+
+    private static final BigDecimal FACTOR_ENDEUDAMIENTO = new BigDecimal("0.35");
 
     private static final BigDecimal SALARIO_MAX = new BigDecimal("15000000");
 
@@ -71,6 +74,13 @@ public final class UserValidation {
                     }
                     return Mono.empty();
                 });
+    }
+
+    public  BigDecimal calcularCapacidadEndeudamiento(BigInteger baseSalary) {
+        if (baseSalary == null) {
+            return BigDecimal.ZERO;
+        }
+        return new BigDecimal(baseSalary).multiply(FACTOR_ENDEUDAMIENTO);
     }
 
 }

@@ -3,6 +3,7 @@ package co.com.bancolombia.model.user;
 import co.com.bancolombia.model.rol.Rol;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 
@@ -22,5 +23,6 @@ public class User {
     private String email;
     private String phone;
     private BigInteger baseSalary;
+    private BigDecimal maxIndebtedness;
     private Rol role;
 }

@@ -1,6 +1,14 @@
 server:
   port: 8081
+  forward-headers-strategy: framework
 spring:
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   application:
     name: "authentication"
   devtools:
@@ -15,7 +23,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,prometheus"
+        include:
+          - health
+          - prometheus
   endpoint:
     health:
       probes:
@@ -34,14 +44,14 @@ springdoc:
 
 adapters:
   r2dbc:
-    host: localhost
-    port: 5432          # <— faltaba
-    database: autenticacion
-    username: postgres
-    password: postgres
-    schema: public
+    host: ${DB_HOST}
+    port: ${DB_PORT}
+    database: ${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    schema: ${DB_SCHEMA}
 
 jwt:
-  secret: "a-string-secret-at-least-256-bits-long"
+  secret: ${JWT_SECRET}
   expiration: 14400
   issuer: "autenticacion-ms"
